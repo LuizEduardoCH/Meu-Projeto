@@ -1,0 +1,181 @@
+from abc import ABC, abstractmethod
+
+# Classe abstrata
+class ItemCardapio(ABC):
+    def __init__(self, nome, preco):
+        self.__nome = nome
+        self.__preco = preco
+
+    def get_nome(self):
+        return self.__nome
+
+    def get_preco(self):
+        return self.__preco
+
+    @abstractmethod
+    def calcular_preco(self):
+        pass
+
+    @abstractmethod
+    def tempo_preparo(self):
+        pass
+
+# Classe Prato
+class Prato(ItemCardapio):
+    def __init__(self, nome, preco, complexidade):
+        super().__init__(nome, preco)
+        self.complexidade = complexidade
+
+    def calcular_preco(self):
+        return self.get_preco()
+
+    def tempo_preparo(self):
+        if self.complexidade == "simples":
+            return 15
+        elif self.complexidade == "media":
+            return 25
+        else:
+            return 40
+
+# Classe Bebida
+class Bebida(ItemCardapio):
+    def __init__(self, nome, preco, alcoolica):
+        super().__init__(nome, preco)
+        self.alcoolica = alcoolica
+
+    def calcular_preco(self):
+        return self.get_preco()
+
+    def tempo_preparo(self):
+        return 2
+
+# Classe Sobremesa
+class Sobremesa(ItemCardapio):
+    def __init__(self, nome, preco):
+        super().__init__(nome, preco)
+
+    def calcular_preco(self):
+        return self.get_preco()
+
+    def tempo_preparo(self):
+        return 5
+
+# Classe Pedido
+class Pedido:
+    def __init__(self, maior_idade):
+        self.itens = []
+        self.maior_idade = maior_idade
+
+    def adicionar_item(self, item):
+        if isinstance(item, Bebida):
+            if item.alcoolica and not self.maior_idade:
+                print("Não é permitido vender bebida alcoólica para menores.")
+                return False
+
+        self.itens.append(item)
+        return True
+
+    def aplicar_brinde(self):
+        qtd_pratos = 0
+
+        for item in self.itens:
+            if isinstance(item, Prato):
+                qtd_pratos += 1
+
+        if qtd_pratos >= 3:
+            self.itens.append(Sobremesa("Pudim (Brinde)", 0))
+            print("Sobremesa de brinde adicionada!")
+
+    def total(self):
+        soma = 0
+        for item in self.itens:
+            soma += item.calcular_preco()
+        return soma
+
+    def tempo_total(self):
+        tempo = 0
+        for item in self.itens:
+            tempo += item.tempo_preparo()
+        return tempo
+
+    def mostrar_pedido(self):
+        print("\nPEDIDO")
+        for item in self.itens:
+            print(f"- {item.get_nome()} - R$ {item.calcular_preco():.2f}")
+
+        print(f"\nTotal: R$ {self.total():.2f}")
+        print(f"Tempo de preparo: {self.tempo_total()} minutos")
+
+
+# Programa principal
+idade = int(input("Digite sua idade: "))
+pedido = Pedido(idade >= 18)
+
+while True:
+    print("\n====== CARDÁPIO ======")
+    print("1 - Arroz e Feijão - R$25")
+    print("2 - Lasanha - R$40")
+    print("3 - Parmegiana - R$35")
+    print("4 - Cerveja - R$8")
+    print("5 - Refrigerante - R$6")
+    print("6 - Sobremesas")
+    print("7 - Finalizar pedido")
+
+    opcao = input("Escolha uma opção: ")
+
+    if opcao == "1":
+        pedido.adicionar_item(Prato("Arroz e Feijão", 25, "simples"))
+        print("Item adicionado!")
+
+    elif opcao == "2":
+        pedido.adicionar_item(Prato("Lasanha", 40, "elaborada"))
+        print("Item adicionado!")
+
+    elif opcao == "3":
+        pedido.adicionar_item(Prato("Parmegiana", 35, "media"))
+        print("Item adicionado!")
+
+    elif opcao == "4":
+        if pedido.adicionar_item(Bebida("Cerveja", 8, True)):
+            print("Item adicionado!")
+
+    elif opcao == "5":
+        if pedido.adicionar_item(Bebida("Refrigerante", 6, False)):
+            print("Item adicionado!")
+
+    elif opcao == "6":
+        while True:
+            print("\n====== SOBREMESAS ======")
+            print("1 - Pudim - R$12")
+            print("2 - Sorvete - R$10")
+            print("3 - Mousse de Maracujá - R$15")
+            print("4 - Voltar")
+
+            opcao_sobremesa = input("Escolha uma sobremesa: ")
+
+            if opcao_sobremesa == "1":
+                pedido.adicionar_item(Sobremesa("Pudim", 12))
+                print("Sobremesa adicionada!")
+
+            elif opcao_sobremesa == "2":
+                pedido.adicionar_item(Sobremesa("Sorvete", 10))
+                print("Sobremesa adicionada!")
+
+            elif opcao_sobremesa == "3":
+                pedido.adicionar_item(Sobremesa("Mousse de Maracujá", 15))
+                print("Sobremesa adicionada!")
+
+            elif opcao_sobremesa == "4":
+                break
+
+            else:
+                print("Opção inválida!")
+
+    elif opcao == "7":
+        break
+
+    else:
+        print("Opção inválida!")
+
+pedido.aplicar_brinde()
+pedido.mostrar_pedido()
